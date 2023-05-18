@@ -15,7 +15,7 @@
 
   The supported reviews include:
 
-  * Check whether any parameter names for certain definitions use
+  * Check whether any parameter names for certain definitions are
     built-in names (e.g. `count`, `hash`, `keys`, `kvs`, `min`, `table`,
     `type`, etc.).
 
@@ -26,6 +26,16 @@
     * varfn
 
     There isn't any support for destructured forms at the moment.
+
+  * Check whether a definition's name is a built-in name.
+
+    The definitions that are checked include:
+
+    * defn / defn-
+    * defmacro / defmacro-
+    * def / def-
+    * varfn
+    * var / var-
 
   Perhaps other things might be checked for eventually...
   ``)
@@ -48,7 +58,9 @@
     ``
     (<::type '[capture [choice "defn-" "defn"
                                "defmacro-" "defmacro"
-                               "varfn"]]>
+                               "def-" "def"
+                               "varfn"
+                               "var-" "var"]]>
      <::name :blob>
      <:...>)
     ``)
@@ -97,25 +109,36 @@
         (def crs-at-node
           (jc/make-cursor id->node
                           (get id->node id)))
-        (def crs-at-params
-          (jc/right-until crs-at-node
-                          |(match ($ :node)
-                             [:dl/square]
-                             true)))
-        (when crs-at-params
-          (def builtin-sym-nodes
-            (filter |(match $
-                       [:blob _ a-name]
-                       (index-of (symbol a-name) root-bindings))
-                    (jc/children crs-at-params)))
-          #
-          (when (not (empty? builtin-sym-nodes))
-            (each sym-node builtin-sym-nodes
-              (def sym-name (get sym-node 2))
-              (def sym-line (get-in sym-node [1 :bl]))
-              (def sym-col (get-in sym-node [1 :bc]))
-              (eprintf "%s:%d:%d `%s` has parameter with built-in name: `%s`"
-                       path sym-line sym-col name sym-name)))))
+        (when (index-of (symbol name) root-bindings)
+          (def name-line (get attrs :bl))
+          (def name-col (get attrs :bc))
+          (eprintf "%s:%d:%d `%s` is a built-in name"
+                   path name-line name-col name))
+        (when (get {"defmacro" true
+                    "defmacro-" true
+                    "defn" true
+                    "defn-" true
+                    "varfn" true}
+                   (get res ::type))
+          (def crs-at-params
+            (jc/right-until crs-at-node
+                            |(match ($ :node)
+                               [:dl/square]
+                               true)))
+          (when crs-at-params
+            (def builtin-sym-nodes
+              (filter |(match $
+                         [:blob _ a-name]
+                         (index-of (symbol a-name) root-bindings))
+                      (jc/children crs-at-params)))
+            #
+            (when (not (empty? builtin-sym-nodes))
+              (each sym-node builtin-sym-nodes
+                (def sym-name (get sym-node 2))
+                (def sym-line (get-in sym-node [1 :bl]))
+                (def sym-col (get-in sym-node [1 :bc]))
+                (eprintf "%s:%d:%d `%s` has parameter with built-in name: `%s`"
+                         path sym-line sym-col name sym-name))))))
 
       # reset id->node and loc->id for next path
       (reset!)))

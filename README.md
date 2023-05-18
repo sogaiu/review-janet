@@ -6,7 +6,8 @@ Review tool for `.janet` code.
 
 Not much yet :)
 
-* Checks whether parameter names use built-in names.
+* Checks whether parameter names are built-in names.
+* Checks whether definition names are built-in names.
 
 ## Invocation Examples
 
@@ -33,6 +34,27 @@ sample.janet:6:4 `my-other-fn` has parameter with built-in name: `count`
 
 ```
 
+Check if a definition's name shadows a built-in name.
+
+Suppose there is a file named `sample2.janet` with content:
+
+```janet
+(defn inc
+  [x]
+  (+ 1 x))
+
+(def default-peg-grammar
+  {:a '(range "ay" "AY")})
+```
+
+The file may be checked by:
+
+```
+$ rjan sample2.janet
+sample2.janet:1:7 `inc` is a built-in name
+sample2.janet:5:6 `default-peg-grammar` is a built-in name
+```
+
 Get basic help.
 
 ```
@@ -48,8 +70,9 @@ report on findings for each located .janet file.
 
 The supported reviews include:
 
-* Check whether any parameter names for certain definitions use
-  built-in names (e.g. `count`, `keys`, `kvs`, `min`, `type`, etc.).
+* Check whether any parameter names for certain definitions are
+  built-in names (e.g. `count`, `hash`, `keys`, `kvs`, `min`, `table`,
+  `type`, etc.).
 
   The definitions that are checked include:
 
@@ -58,6 +81,16 @@ The supported reviews include:
   * varfn
 
   There isn't any support for destructured forms at the moment.
+
+* Check whether a definition's name is a built-in name.
+
+  The definitions that are checked include:
+
+  * defn / defn-
+  * defmacro / defmacro-
+  * def / def-
+  * varfn
+  * var / var-
 
 Perhaps other things might be checked for eventually...
 ```
