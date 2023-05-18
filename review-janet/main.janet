@@ -43,7 +43,10 @@
 ########################################################################
 
 (defn main
-  [& args]
+  [& argv]
+
+  (def args
+    (array/slice argv))
 
   (when (or (one? (length args))
             (when-let [arg (get args 1)]
@@ -51,6 +54,13 @@
                   (= "-h" arg))))
     (print usage)
     (os/exit 0))
+
+  # XXX
+  (def on-stdin
+    (when-let [arg (get args 1)]
+      (when (or (= "--stdin" arg)
+                (= "-s" arg))
+        (array/remove args 1))))
 
   (def start (os/clock))
 
@@ -77,21 +87,39 @@
   (def src-paths
     (fs/collect-paths args))
 
+  (when on-stdin
+    (array/push src-paths :stdin))
+
   # in each file, look for parameters that have built-in names
   (each path src-paths
 
-    (unless (os/stat path)
-      (eprintf "Non-existent path: %s" path)
-      (os/exit 1))
+    (when (string? path)
+      (unless (os/stat path)
+        (eprintf "Non-existent path: %s" path)
+        (os/exit 1)))
 
     (def src
-      (slurp path))
+      (if (string? path)
+        (slurp path)
+        (file/read stdin :all)))
 
     (def [results _ loc->node]
       (try
         (jq/query query-str src {:blank-delims [`<` `>`]})
         ([e]
-          (eprintf "%s:0:0 query failed: %s" path e)
+          (def m
+            (peg/match '(sequence (thru "line: ")
+                                  (capture :d+)
+                                  " "
+                                  (thru "column: ")
+                                  (capture :d+))
+                       e))
+          (def line
+            (scan-number (get m 0)))
+          (def col
+            (scan-number (get m 1)))
+          (eprintf "error: %s:%d:%d: query failed: %s"
+                   path line col e)
           [nil nil nil])))
 
     (when results
@@ -112,7 +140,9 @@
         (when (index-of (symbol name) root-bindings)
           (def name-line (get attrs :bl))
           (def name-col (get attrs :bc))
-          (eprintf "%s:%d:%d `%s` is a built-in name"
+          (eprintf (string "info: "
+                           "%s:%d:%d: `%s` "
+                           "is a built-in name")
                    path name-line name-col name))
         (when (get {"defmacro" true
                     "defmacro-" true
@@ -137,7 +167,9 @@
                 (def sym-name (get sym-node 2))
                 (def sym-line (get-in sym-node [1 :bl]))
                 (def sym-col (get-in sym-node [1 :bc]))
-                (eprintf "%s:%d:%d `%s` has parameter with built-in name: `%s`"
+                (eprintf (string "info: "
+                                 "%s:%d:%d: `%s` "
+                                 "has parameter with built-in name: `%s`")
                          path sym-line sym-col name sym-name))))))
 
       # reset id->node and loc->id for next path
