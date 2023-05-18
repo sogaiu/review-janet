@@ -1,4 +1,3 @@
-(import ./bindings :as bind)
 (import ./fs :as fs)
 (import ./janet-cursor :as jc)
 (import ./janet-query :as jq)
@@ -54,6 +53,9 @@
      <:...>)
     ``)
 
+  (def root-bindings
+    (all-bindings root-env true))
+
   (def {:grammar loc-grammar
         :node-table id->node
         :loc-table loc->id
@@ -104,7 +106,7 @@
           (def builtin-sym-nodes
             (filter |(match $
                        [:blob _ a-name]
-                       (index-of (symbol a-name) bind/raw-all-bindings))
+                       (index-of (symbol a-name) root-bindings))
                     (jc/children crs-at-params)))
           #
           (when (not (empty? builtin-sym-nodes))
