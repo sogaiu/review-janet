@@ -11,7 +11,7 @@ Not much yet :)
 
 ## Invocation Examples
 
-Check for parameter names shadowing built-in names.
+### Check for parameter names shadowing built-in names
 
 Suppose there is a file named `sample.janet` with content:
 
@@ -29,12 +29,11 @@ The file may be checked by:
 
 ```
 $ rjan sample.janet
-sample.janet:2:4 `my-fn` has parameter with built-in name: `table`
-sample.janet:6:4 `my-other-fn` has parameter with built-in name: `count`
-
+info: sample.janet:2:4: `my-fn` has parameter with built-in name: `table`
+info: sample.janet:6:4: `my-other-fn` has parameter with built-in name: `count`
 ```
 
-Check if a definition's name shadows a built-in name.
+### Check if a definition's name shadows a built-in name
 
 Suppose there is a file named `sample2.janet` with content:
 
@@ -51,11 +50,11 @@ The file may be checked by:
 
 ```
 $ rjan sample2.janet
-sample2.janet:1:7 `inc` is a built-in name
-sample2.janet:5:6 `default-peg-grammar` is a built-in name
+info: sample2.janet:1:7: `inc` is a built-in name
+info: sample2.janet:5:6: `default-peg-grammar` is a built-in name
 ```
 
-Get basic help.
+### Get basic help
 
 ```
 $ rjan -h
