@@ -4,10 +4,13 @@ Review tool for `.janet` code.
 
 ## Status
 
-Not much yet :)
-
 * Checks whether parameter names are built-in names.
 * Checks whether definition names are built-in names.
+
+There's not much yet, but it can be used ("chained") along with `janet
+-k` in Emacs using
+[flycheck-janet](https://github.com/sogaiu/flycheck-janet) and
+[flycheck-rjan](https://github.com/sogaiu/flycheck-rjan).
 
 ## Invocation Examples
 
