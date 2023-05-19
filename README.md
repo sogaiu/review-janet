@@ -149,3 +149,36 @@ The supported reviews include:
 
 Perhaps other things might be checked for eventually...
 ```
+
+## Stats
+
+Based on running `rjan` across some collected Janet code, the top 10
+built-in names that were used as parameters were:
+
+```
+1. type: 18
+2. last: 13
+3. hash: 12
+3. doc: 12
+5. keys: 11
+5. table: 11
+5. count: 11
+8. in: 10
+8. pairs: 10
+10. max: 8
+```
+
+The top 10 built-in names that were "overridden" were:
+
+```
+1. parse: 32
+2. update: 21
+3. assert: 19
+4. count: 18
+5. last: 16
+6. get: 15
+7. label: 14
+8. sum: 12
+8. all: 12
+8. compile: 12
+```
