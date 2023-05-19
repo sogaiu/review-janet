@@ -10,3 +10,11 @@
   :main "rjan"
   :is-janet true)
 
+(task "cmd-line-tests" []
+  :tags [:test]
+  (os/execute ["janet"
+               "script/run-cmd-line-tests.janet"
+               "data/cmd"
+               "data/stdout"
+	       "data/stderr"]
+              :p))

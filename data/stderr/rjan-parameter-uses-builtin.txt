@@ -1,0 +1,2 @@
+info: data/samples/parameter-uses-builtin.janet:2:4: `my-fn` has parameter with built-in name: `table`
+info: data/samples/parameter-uses-builtin.janet:6:4: `my-other-fn` has parameter with built-in name: `count`

@@ -1,0 +1,2 @@
+info: data/samples/def-name-uses-builtin.janet:1:7: `inc` is a built-in name
+info: data/samples/def-name-uses-builtin.janet:5:6: `default-peg-grammar` is a built-in name
