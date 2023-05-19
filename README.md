@@ -7,10 +7,63 @@ Review tool for `.janet` code.
 * Checks whether parameter names are built-in names.
 * Checks whether definition names are built-in names.
 
-There's not much yet, but it can be used ("chained") along with `janet
--k` in Emacs using
+There's not much yet, but it can be used via a couple of editors or
+via direct invocation.
+
+## Use in Editors
+
+### Emacs
+
+`rjan` can be ("chained") along with `janet -k` in Emacs using
 [flycheck-janet](https://github.com/sogaiu/flycheck-janet) and
 [flycheck-rjan](https://github.com/sogaiu/flycheck-rjan).
+
+### Neovim
+
+`rjan` can be used via
+[nvim-lint](https://github.com/mfussenegger/nvim-lint/) along with
+`janet -k` in Neovim with a little work.
+
+Had some success with something like the following in `init.vim`:
+
+
+```vimscript
+lua <<EOF
+require('lint').linters_by_ft = {
+  janet = {'janet', 'rjan'}
+}
+EOF
+```
+
+along with making a file at `nvim-lint/lua/lint/linters/rjan.lua` with
+the content:
+
+```
+-- info: path:line:col: message
+-- warning: path:line:col: message
+-- error: path:line:col: message
+local pattern = '([^ ]+): [^:]+:(%d+):(%d+): (.+)'
+local groups = { 'severity', 'lnum', 'col', 'message' }
+local severity_map = {
+  info = vim.diagnostic.severity.INFO,
+  warning = vim.diagnostic.severity.WARN,
+  error = vim.diagnostic.severity.ERROR,
+}
+local defaults = { source = 'rjan' }
+
+return {
+  cmd = 'rjan',
+  stdin = true,
+  args = {
+    '-s',
+  },
+  stream = 'stderr',
+  ignore_exitcode = true,
+  parser =
+    require('lint.parser').from_pattern(pattern, groups,
+                                        severity_map, defaults),
+}
+```
 
 ## Invocation Examples
 
