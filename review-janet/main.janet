@@ -1,6 +1,6 @@
 (import ./fs :as fs)
+(import ./search :as s)
 (import ./janet-cursor :as jc)
-(import ./janet-peg :as jp)
 
 (def usage
   ``
@@ -62,58 +62,53 @@
                 (= "-s" arg))
         (array/remove args 1))))
 
+  # for measuring duration of processing
   (def start (os/clock))
 
+  # for looking up built-in names
   (def root-bindings
     (all-bindings root-env true))
 
+  # make sure to have an even number of captures
+  # that are made from pairs of captures such that
+  # the first of a pair is `(constant ::<name>)` and
+  # the second is something that produces one capture
+  # as the captures will be used to create a table
+  (def query-peg
+    ~(sequence `(`
+               :s*
+               (constant ::type)
+               (capture (choice "defn-" "defn"
+                                "defmacro-" "defmacro"
+                                "def-" "def"
+                                "varfn"
+                                "var-" "var"))
+               :s+
+               (constant ::name)
+               :blob
+               :s+
+               (drop (any :input))
+               `)`))
+
+  # for traversing source - to collect basic info to review
+  (def {:search-grammar search-grammar
+        :backstack backstack
+        :reset-backstack reset-backstack!}
+    (s/make-search-infra query-peg))
+
+  # for cursors - to examine things (e.g. parents, siblings, etc.)
+  # based on the collected info
   (def {:grammar loc-grammar
         :node-table id->node
         :loc-table loc->id
-        :reset reset!}
+        :reset reset-tables!}
     (jc/make-infra))
 
-  (def lang-grammar
-    (jp/make-grammar))
-
-  (def backstack @[])
-
-  (def query-peg
-    ~(cmt (sequence `(`
-                    :s*
-                    (constant ::type)
-                    (capture (choice "defn-" "defn"
-                                     "defmacro-" "defmacro"
-                                     "def-" "def"
-                                     "varfn"
-                                     "var-" "var"))
-                    :s+
-                    (constant ::name)
-                    :blob
-                    :s+
-                    (drop (any :input))
-                    `)`)
-          ,(fn [& caps]
-             (when (not (empty? caps))
-               (array/push backstack (table ;caps)))
-             caps)))
-
-  (def search-grammar
-    (-> (table ;(kvs lang-grammar))
-        (put :main ~(some :input))
-        # add our query to the grammar
-        (put :query query-peg)
-        # make the query one of the items in the choice special for
-        # :form so querying works on "interior" forms.  otherwise only
-        # top-level captures show up.
-        (put :form (let [old-form (get lang-grammar :form)]
-                     (tuple 'choice
-                            :query
-                            ;(tuple/slice old-form 1))))))
-
+  # all the paths to examine
   (def src-paths
     (fs/collect-paths args))
 
+  # ...and possibly a special case for handling standard input
   (when on-stdin
     (array/push src-paths :stdin))
 
@@ -130,14 +125,18 @@
         (slurp path)
         (file/read stdin :all)))
 
-    (array/clear backstack)
+    # this needs to be done before a new file is examined
+    # so earlier results don't confuse things
+    (reset-backstack!)
 
+    # the initial source traversal, collecting basic info
     (def results
       (peg/match search-grammar src))
 
     (when (and results backstack)
 
-      # side-effect of filling in id->node and loc->id
+      # preparation for the cursor bits to function
+      # (side-effect of filling in id->node and loc->id)
       (peg/match loc-grammar src)
 
       (each res backstack
@@ -147,9 +146,7 @@
         (unless id
           (eprintf "no id for loc: %p" loc)
           (break))
-        (def crs-at-node
-          (jc/make-cursor id->node
-                          (get id->node id)))
+        # check if a definition uses a built-in name
         (when (index-of (symbol name) root-bindings)
           (def name-line (get attrs :bl))
           (def name-col (get attrs :bc))
@@ -157,12 +154,18 @@
                            "%s:%d:%d: `%s` "
                            "is a built-in name")
                    path name-line name-col name))
+        # check if anything with parameters uses a built-in name
         (when (get {"defmacro" true
                     "defmacro-" true
                     "defn" true
                     "defn-" true
                     "varfn" true}
                    (get res ::type))
+          # XXX: move this before the check above if other lints
+          #      that use the cursor get added
+          (def crs-at-node
+            (jc/make-cursor id->node
+                            (get id->node id)))
           (def crs-at-params
             (jc/right-until crs-at-node
                             |(match ($ :node)
@@ -186,7 +189,7 @@
                          path sym-line sym-col name sym-name))))))
 
       # reset id->node and loc->id for next path
-      (reset!)))
+      (reset-tables!)))
 
   (when (os/getenv "VERBOSE")
     (printf "%d files processed in %g secs"
