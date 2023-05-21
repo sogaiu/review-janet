@@ -79,14 +79,17 @@
                      ;children]]
            (put id->node id node)
            node)))
-
+  #
   (def loc-grammar
     (make-grammar {:opaque-node opaque-node
                    :delim-node delim-node}))
+  #
   (defn make-tables!
     [src]
     (reset!)
-    (peg/match loc-grammar src))
+    (peg/match loc-grammar src)
+    #
+    [id->node loc->id])
   #
   (defn par
     [src &opt start single]

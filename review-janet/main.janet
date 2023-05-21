@@ -96,9 +96,7 @@
 
   # for cursors - to examine things (e.g. parents, siblings, etc.)
   # based on the collected info
-  (def {:node-table id->node
-        :loc-table loc->id
-        :make-tables make-tables!}
+  (def {:make-tables make-tables!}
     (jc/make-cursor-infra))
 
   # all the paths to examine
@@ -123,17 +121,16 @@
         (file/read stdin :all)))
 
     # the initial source traversal, collecting basic info
-    (def [backstack _]
+    (def [results _]
       (study src))
 
-    (when backstack
+    (when results
 
       # preparation for the cursor bits to function
-      # (side-effects of filling in id->node and loc->id, also resets
-      #  previous table content)
-      (make-tables! src)
+      (def [id->node loc->id]
+        (make-tables! src))
 
-      (each res backstack
+      (each res results
         (def [_ attrs name] (get res ::name))
         (def loc (freeze attrs))
         (def id (loc->id loc))
