@@ -1,6 +1,9 @@
 (import ./fs :as fs)
-(import ./study :as s)
 (import ./janet-cursor :as jc)
+(import ./note :as n)
+(import ./report :as r)
+(import ./study :as s)
+
 
 (def usage
   ``
@@ -99,6 +102,11 @@
   (def {:make-tables make-tables!}
     (jc/make-cursor-infra))
 
+  # for noting results
+  (def {:note note!
+        :record record}
+    (n/make-note-infra))
+
   # all the paths to examine
   (def src-paths
     (fs/collect-paths args))
@@ -139,12 +147,11 @@
           (break))
         # check if a definition uses a built-in name
         (when (index-of (symbol name) root-bindings)
-          (def name-line (get attrs :bl))
-          (def name-col (get attrs :bc))
-          (eprintf (string "info: "
-                           "%s:%d:%d: `%s` "
-                           "is a built-in name")
-                   path name-line name-col name))
+          (note! {:type :def-uses-builtin
+                  :path path
+                  :name name
+                  :bl (get attrs :bl)
+                  :bc (get attrs :bc)}))
         # check if anything with parameters uses a built-in name
         (when (get {"defmacro" true
                     "defmacro-" true
@@ -171,13 +178,14 @@
             #
             (when (not (empty? builtin-sym-nodes))
               (each sym-node builtin-sym-nodes
-                (def sym-name (get sym-node 2))
-                (def sym-line (get-in sym-node [1 :bl]))
-                (def sym-col (get-in sym-node [1 :bc]))
-                (eprintf (string "info: "
-                                 "%s:%d:%d: `%s` "
-                                 "has parameter with built-in name: `%s`")
-                         path sym-line sym-col name sym-name))))))))
+                (note! {:type :param-uses-builtin
+                        :path path
+                        :def-name name
+                        :builtin-name (get sym-node 2)
+                        :bl (get-in sym-node [1 :bl])
+                        :bc (get-in sym-node [1 :bc])}))))))))
+
+  (r/to-stderr record)
 
   (when (os/getenv "VERBOSE")
     (printf "%d files processed in %g secs"
