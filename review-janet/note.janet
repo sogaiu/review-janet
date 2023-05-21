@@ -6,6 +6,11 @@
     [info]
     (array/push record info))
 
+  (defn reset-record!
+    []
+    (array/clear record))
+
   {:note note!
-   :record record})
+   :record record
+   :reset-record reset-record!})
 

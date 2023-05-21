@@ -104,7 +104,8 @@
 
   # for noting results
   (def {:note note!
-        :record record}
+        :record record
+        :reset-record reset-record!}
     (n/make-note-infra))
 
   # all the paths to examine
@@ -183,9 +184,13 @@
                         :def-name name
                         :builtin-name (get sym-node 2)
                         :bl (get-in sym-node [1 :bl])
-                        :bc (get-in sym-node [1 :bc])}))))))))
+                        :bc (get-in sym-node [1 :bc])}))))))
 
-  (r/to-stderr record)
+      # report results
+      (r/to-stderr record)
+
+      # clear record to prepare for next round
+      (reset-record!)))
 
   (when (os/getenv "VERBOSE")
     (printf "%d files processed in %g secs"
