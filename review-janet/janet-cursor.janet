@@ -2,7 +2,7 @@
 # to make generic cursor functions available
 (import ./cursor :prefix "" :export true)
 
-(defn make-infra
+(defn make-cursor-infra
   []
   (init-infra jp/make-grammar))
 
@@ -13,7 +13,7 @@
         :node-table id->node
         :loc-table loc->id
         :reset reset}
-    (make-infra))
+    (make-cursor-infra))
 
   (reset)
 

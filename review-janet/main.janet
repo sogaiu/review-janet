@@ -96,11 +96,10 @@
 
   # for cursors - to examine things (e.g. parents, siblings, etc.)
   # based on the collected info
-  (def {:grammar loc-grammar
-        :node-table id->node
+  (def {:node-table id->node
         :loc-table loc->id
-        :reset reset-tables!}
-    (jc/make-infra))
+        :make-tables make-tables!}
+    (jc/make-cursor-infra))
 
   # all the paths to examine
   (def src-paths
@@ -129,14 +128,10 @@
 
     (when backstack
 
-      # this needs to be done before a new file is examined
-      # so earlier results don't confuse things
-      # (reset id->node and loc->id for next path)
-      (reset-tables!)
-
       # preparation for the cursor bits to function
-      # (side-effect of filling in id->node and loc->id)
-      (peg/match loc-grammar src)
+      # (side-effects of filling in id->node and loc->id, also resets
+      #  previous table content)
+      (make-tables! src)
 
       (each res backstack
         (def [_ attrs name] (get res ::name))

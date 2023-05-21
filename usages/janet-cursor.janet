@@ -5,7 +5,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   (par "(+ 1 1)")
   # =>
@@ -73,7 +73,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   (par "(+ 1 1)")
 
@@ -131,7 +131,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   # populates id->node
   (par "(+ 1 1)")
@@ -172,7 +172,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   # populates id->node
   (par "(defn a [x] (+ x 1) (/ x 2))")
@@ -198,7 +198,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   (par "[1 2 3 8 9 0]")
 
@@ -220,7 +220,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   (par "[:a :b :c]")
 
@@ -251,7 +251,7 @@
   (def {:grammar loc-grammar
         :node-table id->node
         :parse par}
-    (jc/make-infra))
+    (jc/make-cursor-infra))
 
   # populates id->node
   (par "(defn a [x] (+ x 1) (/ x 2))")

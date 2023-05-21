@@ -12,7 +12,7 @@
 
   (def loc->id @{})
 
-  (defn reset
+  (defn reset!
     []
     (set counter 0)
     (table/clear id->node)
@@ -83,19 +83,20 @@
   (def loc-grammar
     (make-grammar {:opaque-node opaque-node
                    :delim-node delim-node}))
-
+  (defn make-tables!
+    [src]
+    (reset!)
+    (peg/match loc-grammar src))
   #
   (defn par
     [src &opt start single]
     (default start 0)
     (def top-id 0)
     (def loc-top-level-ast
-      (let [ltla (table ;(kvs loc-grammar))]
-        (put ltla
-             :main ~(sequence (line) (column) (position)
-                              :input
-                              (line) (column) (position)))
-        (table/to-struct ltla)))
+      (put (table ;(kvs loc-grammar))
+           :main ~(sequence (line) (column) (position)
+                            :input
+                            (line) (column) (position))))
     #
     (def top-node
       (if single
@@ -129,8 +130,9 @@
   {:grammar loc-grammar
    :node-table id->node
    :loc-table loc->id
+   :make-tables make-tables!
    :issuer issue-id
-   :reset reset
+   :reset reset!
    :parse par})
 
 (defn make-cursor
