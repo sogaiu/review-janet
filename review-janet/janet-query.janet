@@ -70,7 +70,7 @@
                       :delim-node delim-node}))
 
   (def query-grammar
-    (-> (struct/to-table lang-grammar)
+    (-> (table ;(kvs lang-grammar))
         (put
           :form (let [old-form (get lang-grammar :form)]
                   (tuple 'choice
@@ -117,12 +117,10 @@
     [src &opt start single]
     (default start 0)
     (def top-level-ast
-      (let [tla (table ;(kvs query-grammar))]
-        (put tla
-             :main ~(sequence (line) (column) (position)
-                              :input
-                              (line) (column) (position)))
-        (table/to-struct tla)))
+      (put (table ;(kvs query-grammar))
+           :main ~(sequence (line) (column) (position)
+                            :input
+                            (line) (column) (position))))
     #
     (def top-node
       (if single
@@ -482,7 +480,7 @@
              args)))
   # integrate the query-peg with the language grammar
   (def search-grammar
-    (-> (struct/to-table l-grammar)
+    (-> (table ;(kvs l-grammar))
         (put :main ~(some :input))
         # add our query to the grammar
         (put :query query-peg)

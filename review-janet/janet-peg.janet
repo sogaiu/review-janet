@@ -36,84 +36,84 @@
                               ;(tuple/slice $& (- (- 3) 2) -2))
                 ;(tuple/slice $& 3 (- (- 3 ) 2))]))))
   #
-  ~{:main (sequence (line) (column) (position)
-                    (some :input)
-                    (line) (column) (position))
-    #
-    :input (choice :ws
-                   :cmt
-                   :form)
-    #
-    :ws (choice :ws/horiz
-                :ws/eol)
-    #
-    :ws/horiz ,(opaque-node :ws/horiz
-                            '(some (set " \0\f\t\v")))
-    #
-    :ws/eol ,(opaque-node :ws/eol
-                          '(choice "\r\n"
-                                   "\r"
-                                   "\n"))
-    #
-    :cmt :cmt/line
-    #
-    :cmt/line
-    ,(opaque-node :cmt/line
-                  '(sequence "#"
-                             (any (if-not (set "\r\n") 1))))
-    #
-    :form (choice :str
-                  :blob
-                  :dl)
-    #
-    :str (choice :str/dq
-                 :str/bt)
-    #
-    :str/dq
-    ,(opaque-node :str/dq
-                  '(sequence `"`
-                             (any (choice :escape
-                                          (if-not `"` 1)))
-                             `"`))
-    #
-    :escape (sequence `\`
-                      (choice (set `0efnrtvz"\`)
-                              (sequence "x" (2 :h))
-                              (sequence "u" (4 :h))
-                              (sequence "U" (6 :h))
-                              (error (constant "bad escape"))))
-    #
-    :str/bt
-    ,(opaque-node :str/bt
-                  ~{:main (drop (sequence :open
-                                          (any (if-not :close 1))
-                                          :close))
-                    :open (capture :delim :n)
-                    :delim (some "`")
-                    :close (cmt (sequence (not (look -1 "`"))
-                                          (backref :n)
-                                          (capture (backmatch :n)))
-                                ,=)})
-    #
-    :blob
-    ,(opaque-node
-       :blob
-       '(some (choice (range "09" "AZ" "az" "\x80\xFF")
-                      (set "!$%&*+-./:<=>?^_")
-                      # XXX: what to do about mutable collections...
-                      "@"
-                      # XXX: possibly separate...
-                      (set "|~';,"))))
-    #
-    :dl (choice :dl/round
-                :dl/square
-                :dl/curly)
-    #
-    :dl/round ,(delim-node :dl/round "(" ")")
-    #
-    :dl/square ,(delim-node :dl/square "[" "]")
-    #
-    :dl/curly ,(delim-node :dl/curly "{" "}")})
+  ~@{:main (sequence (line) (column) (position)
+                     (some :input)
+                     (line) (column) (position))
+     #
+     :input (choice :ws
+                    :cmt
+                    :form)
+     #
+     :ws (choice :ws/horiz
+                 :ws/eol)
+     #
+     :ws/horiz ,(opaque-node :ws/horiz
+                             '(some (set " \0\f\t\v")))
+     #
+     :ws/eol ,(opaque-node :ws/eol
+                           '(choice "\r\n"
+                                    "\r"
+                                    "\n"))
+     #
+     :cmt :cmt/line
+     #
+     :cmt/line
+     ,(opaque-node :cmt/line
+                   '(sequence "#"
+                              (any (if-not (set "\r\n") 1))))
+     #
+     :form (choice :str
+                   :blob
+                   :dl)
+     #
+     :str (choice :str/dq
+                  :str/bt)
+     #
+     :str/dq
+     ,(opaque-node :str/dq
+                   '(sequence `"`
+                              (any (choice :escape
+                                           (if-not `"` 1)))
+                              `"`))
+     #
+     :escape (sequence `\`
+                       (choice (set `0efnrtvz"\`)
+                               (sequence "x" (2 :h))
+                               (sequence "u" (4 :h))
+                               (sequence "U" (6 :h))
+                               (error (constant "bad escape"))))
+     #
+     :str/bt
+     ,(opaque-node :str/bt
+                   ~{:main (drop (sequence :open
+                                           (any (if-not :close 1))
+                                           :close))
+                     :open (capture :delim :n)
+                     :delim (some "`")
+                     :close (cmt (sequence (not (look -1 "`"))
+                                           (backref :n)
+                                           (capture (backmatch :n)))
+                                 ,=)})
+     #
+     :blob
+     ,(opaque-node
+        :blob
+        '(some (choice (range "09" "AZ" "az" "\x80\xFF")
+                       (set "!$%&*+-./:<=>?^_")
+                       # XXX: what to do about mutable collections...
+                       "@"
+                       # XXX: possibly separate...
+                       (set "|~';,"))))
+     #
+     :dl (choice :dl/round
+                 :dl/square
+                 :dl/curly)
+     #
+     :dl/round ,(delim-node :dl/round "(" ")")
+     #
+     :dl/square ,(delim-node :dl/square "[" "]")
+     #
+     :dl/curly ,(delim-node :dl/curly "{" "}")})
 
 (comment
 
