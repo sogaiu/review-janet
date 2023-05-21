@@ -1,5 +1,5 @@
 (import ./fs :as fs)
-(import ./search :as s)
+(import ./study :as s)
 (import ./janet-cursor :as jc)
 
 (def usage
@@ -91,10 +91,8 @@
                `)`))
 
   # for traversing source - to collect basic info to review
-  (def {:search-grammar search-grammar
-        :backstack backstack
-        :reset-backstack reset-backstack!}
-    (s/make-search-infra query-peg))
+  (def {:study study}
+    (s/make-study-infra query-peg))
 
   # for cursors - to examine things (e.g. parents, siblings, etc.)
   # based on the collected info
@@ -125,15 +123,16 @@
         (slurp path)
         (file/read stdin :all)))
 
-    # this needs to be done before a new file is examined
-    # so earlier results don't confuse things
-    (reset-backstack!)
-
     # the initial source traversal, collecting basic info
-    (def results
-      (peg/match search-grammar src))
+    (def [backstack _]
+      (study src))
 
-    (when (and results backstack)
+    (when backstack
+
+      # this needs to be done before a new file is examined
+      # so earlier results don't confuse things
+      # (reset id->node and loc->id for next path)
+      (reset-tables!)
 
       # preparation for the cursor bits to function
       # (side-effect of filling in id->node and loc->id)
@@ -186,10 +185,7 @@
                 (eprintf (string "info: "
                                  "%s:%d:%d: `%s` "
                                  "has parameter with built-in name: `%s`")
-                         path sym-line sym-col name sym-name))))))
-
-      # reset id->node and loc->id for next path
-      (reset-tables!)))
+                         path sym-line sym-col name sym-name))))))))
 
   (when (os/getenv "VERBOSE")
     (printf "%d files processed in %g secs"

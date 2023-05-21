@@ -1,6 +1,6 @@
 (import ./janet-peg :as jp)
 
-(defn make-search-infra
+(defn make-study-infra
   [query-peg]
 
   (def lang-grammar
@@ -15,7 +15,7 @@
                (array/push backstack (table ;caps)))
              caps)))
 
-  (def search-grammar
+  (def study-grammar
     (-> (table ;(kvs lang-grammar))
         (put :main ~(some :input))
         # add our query to the grammar
@@ -28,11 +28,13 @@
                             :query
                             ;(tuple/slice old-form 1))))))
 
-  (defn reset-backstack!
-    []
-    (array/clear backstack))
+  (defn study
+    [src]
+    (array/clear backstack)
+    #
+    [backstack 
+     (peg/match study-grammar src)])
 
-  {:search-grammar search-grammar
-   :backstack backstack
-   :reset-backstack reset-backstack!})
+  {:study study
+   :backstack backstack})
 
