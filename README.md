@@ -125,8 +125,8 @@ report on findings for each located .janet file.
 
 The supported reviews include:
 
-* Check whether any parameter names for certain definitions are
-  built-in names (e.g. `count`, `hash`, `keys`, `kvs`, `min`, `table`,
+* Check if any parameter names for certain definitions are built-in
+  names (e.g. `count`, `hash`, `keys`, `kvs`, `min`, `table`,
   `type`, etc.).
 
   The definitions that are checked include:
@@ -137,7 +137,7 @@ The supported reviews include:
 
   There isn't any support for destructured forms at the moment.
 
-* Check whether a definition's name is a built-in name.
+* Check if a definition's name is a built-in name.
 
   The definitions that are checked include:
 
@@ -145,6 +145,13 @@ The supported reviews include:
   * defmacro / defmacro-
   * def / def-
   * varfn
+  * var / var-
+
+* Check if a name made via destructuring is a built-in name.
+
+  The definitions that are checked include:
+
+  * def / def-
   * var / var-
 
 Perhaps other things might be checked for eventually...

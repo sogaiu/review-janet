@@ -1,0 +1,4 @@
+info: data/samples/destruct-name-uses-builtin.janet:1:7: destructuring name is a built-in name: `inc`
+info: data/samples/destruct-name-uses-builtin.janet:1:11: destructuring name is a built-in name: `dec`
+info: data/samples/destruct-name-uses-builtin.janet:4:7: destructuring name is a built-in name: `print`
+info: data/samples/destruct-name-uses-builtin.janet:4:13: destructuring name is a built-in name: `eprint`
