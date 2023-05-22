@@ -194,7 +194,7 @@
 
   # all the paths to examine
   (def src-paths
-    (fs/collect-paths args))
+    (fs/collect-paths (slice args 1)))
 
   # ...and possibly a special case for handling standard input
   (when on-stdin

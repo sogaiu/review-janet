@@ -53,7 +53,7 @@
 (defn collect-paths
   [args]
   (def src-filepaths @[])
-  (each thing (slice args 1)
+  (each thing args
     (def apath
       (clean-end-of-path thing sep))
     (def stat
