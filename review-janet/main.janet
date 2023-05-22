@@ -183,7 +183,7 @@
 
   # for cursors - to examine things (e.g. parents, siblings, etc.)
   # based on the collected info
-  (def {:make-tables make-tables!}
+  (def {:make-tables make-tables}
     (jc/make-cursor-infra))
 
   # for noting results
@@ -221,7 +221,7 @@
 
       # preparation for the cursor bits to function
       (def [id->node loc->id]
-        (make-tables! src))
+        (make-tables src))
 
       (each res results
         (cond
