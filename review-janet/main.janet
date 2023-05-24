@@ -152,7 +152,10 @@
 
   # for looking up built-in names
   (def root-bindings
-    (all-bindings root-env true))
+    (array/concat (all-bindings root-env true)
+                  (map symbol
+                       [:break :def :do :fn :if :quasiquote :quote
+                        :set :splice :unquote :upscope :var :while])))
 
   # make sure to have an even number of captures
   # that are made from pairs of captures such that

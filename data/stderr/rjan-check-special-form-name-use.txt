@@ -1,0 +1,5 @@
+info: data/samples/check-special-form-name-use.janet:1:7: destructuring name is a built-in name: `if`
+info: data/samples/check-special-form-name-use.janet:4:7: `break` is a built-in name
+info: data/samples/check-special-form-name-use.janet:8:9: destructuring name is a built-in name: `set`
+info: data/samples/check-special-form-name-use.janet:11:8: `while` is a built-in name
+info: data/samples/check-special-form-name-use.janet:12:4: `while` has parameter with built-in name: `quote`
