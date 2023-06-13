@@ -16,5 +16,6 @@
                "script/run-cmd-line-tests.janet"
                "data/cmd"
                "data/stdout"
-	       "data/stderr"]
+               "data/stderr"]
               :p))
+
