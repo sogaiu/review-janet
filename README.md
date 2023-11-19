@@ -6,6 +6,7 @@ Review tool for `.janet` code.
 
 * Checks whether parameter names are built-in names.
 * Checks whether definition names are built-in names.
+* Checks whether definition names contain non-ASCII.
 
 There's not much yet, but it can be used via a couple of editors or
 via direct invocation.
@@ -138,6 +139,16 @@ The supported reviews include:
   There isn't any support for destructured forms at the moment.
 
 * Check if a definition's name is a built-in name.
+
+  The definitions that are checked include:
+
+  * defn / defn-
+  * defmacro / defmacro-
+  * def / def-
+  * varfn
+  * var / var-
+
+* Check if a definition's name contains non-ascii.
 
   The definitions that are checked include:
 

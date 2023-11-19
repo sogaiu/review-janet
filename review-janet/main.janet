@@ -40,6 +40,16 @@
     * varfn
     * var / var-
 
+  * Check if a definition's name contains non-ascii.
+
+    The definitions that are checked include:
+
+    * defn / defn-
+    * defmacro / defmacro-
+    * def / def-
+    * varfn
+    * var / var-
+
   * Check if a name made via destructuring is a built-in name.
 
     The definitions that are checked include:
@@ -52,6 +62,12 @@
 
 ########################################################################
 
+(defn contains-non-ascii?
+  [specimen]
+  (def na-peg
+    (peg/compile ~(choice (capture (range "\x80\xFF")) 1)))
+  (not (empty? (peg/match na-peg specimen))))
+
 (defn handle-name-case
   [res path loc->id id->node root-bindings note!]
   (def [_ attrs name] (get res ::name))
@@ -63,6 +79,13 @@
   # check if a definition uses a built-in name
   (when (index-of (symbol name) root-bindings)
     (note! {:type :def-uses-builtin
+            :path path
+            :name name
+            :bl (get attrs :bl)
+            :bc (get attrs :bc)}))
+  # check if identifier contains non-ascii
+  (when (contains-non-ascii? name)
+    (note! {:type :non-ascii-identifier
             :path path
             :name name
             :bl (get attrs :bl)

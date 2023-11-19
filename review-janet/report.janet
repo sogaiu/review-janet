@@ -41,6 +41,17 @@
                     "destructuring name is a built-in name: `%s`")
             path line col bname))
         #
+        :non-ascii-identifier
+        (do
+          (def {:path path
+                :name name
+                :bl line :bc col}
+            item)
+          (string/format
+            (string "info: "
+                    "%s:%d:%d: non-ascii in identifier `%s`")
+            path line col name))
+        #
         (errorf "Unrecognized review type: %p" the-type)))
     (eprint msg)))
 
