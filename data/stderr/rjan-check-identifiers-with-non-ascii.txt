@@ -1,0 +1,2 @@
+info: data/samples/check-identifiers-with-non-ascii.janet:5:1: non-ascii "\xCE" in identifier `Α`
+info: data/samples/check-identifiers-with-non-ascii.janet:5:2: non-ascii "\x91" in identifier `Α`
