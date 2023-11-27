@@ -45,12 +45,13 @@
         (do
           (def {:path path
                 :name name
+                :non-ascii non-ascii
                 :bl line :bc col}
             item)
           (string/format
             (string "info: "
-                    "%s:%d:%d: non-ascii in identifier `%s`")
-            path line col name))
+                    "%s:%d:%d: non-ascii %n in identifier `%s`")
+            path line col non-ascii name))
         #
         :uba-dir-fmt-chars
         (do

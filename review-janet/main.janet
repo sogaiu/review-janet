@@ -100,11 +100,16 @@
                 :bl (get res :bl)
                 :bc (get res :bc)}))))
 
-(defn contains-non-ascii?
+(defn non-ascii-scan
   [specimen]
   (def na-peg
-    (peg/compile ~(choice (capture (range "\x80\xFF")) 1)))
-  (not (empty? (peg/match na-peg specimen))))
+    (peg/compile
+      ~(some (choice (cmt (sequence (column)
+                                    (capture (range "\x80\xFF")))
+                          ,|{:bc $0
+                             :non-ascii $1})
+                     1))))
+  (peg/match na-peg specimen))
 
 (defn handle-name-case
   [res path loc->id id->node root-bindings note!]
@@ -122,12 +127,14 @@
             :bl (get attrs :bl)
             :bc (get attrs :bc)}))
   # check if identifier contains non-ascii
-  (when (contains-non-ascii? name)
-    (note! {:type :non-ascii-identifier
-            :path path
-            :name name
-            :bl (get attrs :bl)
-            :bc (get attrs :bc)}))
+  (when-let [results (non-ascii-scan name)]
+    (each res results
+      (note! {:type :non-ascii-identifier
+              :path path
+              :name name
+              :non-ascii (get res :non-ascii)
+              :bl (get attrs :bl)
+              :bc (get res :bc)})))
   # check if anything with parameters uses a built-in name
   (when (get {"defmacro" true
               "defmacro-" true
