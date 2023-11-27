@@ -52,6 +52,17 @@
                     "%s:%d:%d: non-ascii in identifier `%s`")
             path line col name))
         #
+        :uba-dir-fmt-chars
+        (do
+          (def {:path path
+                :char-name char-name
+                :bl line :bc col}
+            item)
+          (string/format
+            (string "info: "
+                    "%s:%d:%d: unicode bidi formatting char `%s`")
+            path line col char-name))
+        #
         (errorf "Unrecognized review type: %p" the-type)))
     (eprint msg)))
 

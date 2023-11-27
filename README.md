@@ -7,6 +7,7 @@ Review tool for `.janet` code.
 * Checks whether parameter names are built-in names.
 * Checks whether definition names are built-in names.
 * Checks whether definition names contain non-ASCII.
+* Check for presence of Unicode bidirectional formatting characters.
 
 There's not much yet, but it can be used via a couple of editors or
 via direct invocation.
@@ -164,6 +165,9 @@ The supported reviews include:
 
   * def / def-
   * var / var-
+
+  * Check for presence of Unicode bidirectional formatting
+    characters.
 
 Perhaps other things might be checked for eventually...
 ```

@@ -57,10 +57,48 @@
     * def / def-
     * var / var-
 
+  * Check for presence of Unicode bidirectional formatting
+    characters.
+
   Perhaps other things might be checked for eventually...
   ``)
 
 ########################################################################
+
+(defn uba-dir-fmt-chars-scan
+  [src path note!]
+  # https://www.unicode.org/reports/tr9
+  (def udfc-table
+    {"\u061c" "ALM"
+     "\u200e" "LRM"
+     "\u200f" "RLM"
+     #
+     "\u202a" "LRE"
+     "\u202b" "RLE"
+     "\u202c" "PDF"
+     "\u202d" "LRO"
+     "\u202e" "RLO"
+     #
+     "\u2066" "LRI"
+     "\u2067" "RLI"
+     "\u2068" "FSI"
+     "\u2069" "PDI"})
+  (def udfc-peg
+    (peg/compile
+      ~(some (choice (cmt (sequence (line) (column)
+                                    (capture
+                                      (choice ,;(keys udfc-table))))
+                          ,|{:bl $0
+                             :bc $1
+                             :char-name (get udfc-table $2)})
+                     1))))
+    (when-let [results (peg/match udfc-peg src)]
+      (each res results
+        (note! {:type :uba-dir-fmt-chars
+                :path path
+                :char-name (get res :char-name)
+                :bl (get res :bl)
+                :bc (get res :bc)}))))
 
 (defn contains-non-ascii?
   [specimen]
@@ -238,6 +276,9 @@
       (if (string? path)
         (slurp path)
         (file/read stdin :all)))
+
+    # check for bidi bits - cf. trojan source
+    (uba-dir-fmt-chars-scan src path note!)
 
     # the initial source traversal, collecting basic info
     (def [results _]
