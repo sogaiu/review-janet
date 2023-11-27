@@ -1,0 +1,3 @@
+info: data/samples/check-bidi-formatting-chars-use.janet:2:2: unicode bidi formatting char `RLI`
+info: data/samples/check-bidi-formatting-chars-use.janet:2:8: unicode bidi formatting char `PDI`
+info: data/samples/check-bidi-formatting-chars-use.janet:5:2: unicode bidi formatting char `RLO`
