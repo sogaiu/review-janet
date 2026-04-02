@@ -4,7 +4,6 @@
 (import ./report :as r)
 (import ./study :as s)
 
-
 (def usage
   ``
   Usage: rjan [option] [file|dir]...
@@ -17,28 +16,6 @@
   report on findings for each located .janet file.
 
   The supported reviews include:
-
-  * Check if any parameter names for certain definitions are built-in
-    names (e.g. `count`, `hash`, `keys`, `kvs`, `min`, `table`,
-    `type`, etc.).
-
-    The definitions that are checked include:
-
-    * defmacro / defmacro-
-    * defn / defn-
-    * varfn
-
-    There isn't any support for destructured forms at the moment.
-
-  * Check if a definition's name is a built-in name.
-
-    The definitions that are checked include:
-
-    * defn / defn-
-    * defmacro / defmacro-
-    * def / def-
-    * varfn
-    * var / var-
 
   * Check if a definition's name contains non-ascii.
 
@@ -119,13 +96,6 @@
   (unless id
     (eprintf "no id for loc: %p" loc)
     (break))
-  # check if a definition uses a built-in name
-  (when (index-of (symbol name) root-bindings)
-    (note! {:type :def-uses-builtin
-            :path path
-            :name name
-            :bl (get attrs :bl)
-            :bc (get attrs :bc)}))
   # check if identifier contains non-ascii
   (when-let [results (non-ascii-scan name)]
     (each res results
@@ -135,13 +105,6 @@
               :non-ascii (get res :non-ascii)
               :bl (get attrs :bl)
               :bc (get res :bc)})))
-  # check if anything with parameters uses a built-in name
-  (when (get {"defmacro" true
-              "defmacro-" true
-              "defn" true
-              "defn-" true
-              "varfn" true}
-             (get res ::type))
     # XXX: move this before the check above if other lints
     #      that use the cursor get added
     (def crs-at-node
@@ -166,32 +129,7 @@
                   :def-name name
                   :builtin-name (get sym-node 2)
                   :bl (get-in sym-node [1 :bl])
-                  :bc (get-in sym-node [1 :bc])}))))))
-
-(defn handle-destr-tup-case
-  [res path loc->id id->node root-bindings note!]
-  (def [_ attrs] (get res ::destr-tup))
-  (def loc (freeze attrs))
-  (def id (loc->id loc))
-  (unless id
-    (eprintf "no id for loc: %p" loc)
-    (break))
-  (def crs-at-node
-    (jc/make-cursor id->node
-                    (get id->node id)))
-  (def builtin-sym-nodes
-    (filter |(match $
-               [:blob _ a-name]
-               (index-of (symbol a-name) root-bindings))
-            (jc/children crs-at-node)))
-  #
-  (when (not (empty? builtin-sym-nodes))
-        (each sym-node builtin-sym-nodes
-          (note! {:type :destr-tup-uses-builtin
-                  :path path
-                  :builtin-name (get sym-node 2)
-                  :bl (get-in sym-node [1 :bl])
-                  :bc (get-in sym-node [1 :bc])}))))
+                  :bc (get-in sym-node [1 :bc])})))))
 
 ########################################################################
 
@@ -301,10 +239,6 @@
         (cond
           (get res ::name)
           (handle-name-case
-            res path loc->id id->node root-bindings note!)
-          #
-          (get res ::destr-tup)
-          (handle-destr-tup-case
             res path loc->id id->node root-bindings note!)
           #
           (errorf "Unknown result type, keys were: %p" (keys res))))
